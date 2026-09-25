@@ -14,6 +14,18 @@
 - **안전한 UID 관리**: 암호화된 로컬 저장소에 게임 ID 안전하게 보관
 - **자동 모니터링**: Cloud Functions가 매 분마다 새 쿠폰 확인
 
+## 서비스 아키텍처
+
+![쿠폰스탕스 아키텍처: 네이버 쿠폰 수집, Firebase의 알림·목록 제공, Flutter 앱과 게임사 WebView 등록 흐름](docs/assets/architecture.svg)
+
+> **인수 시점의 상태:** 기존 Firebase 프로젝트는 삭제되었으며, 그림은 현재 소스에 정의된 구조를 설명합니다. 인수자가 새 Firebase를 구축하고 앱 연결과 필수 수정사항을 반영해야 합니다. 재구축 절차와 알려진 문제는 [인수인계 문서](docs/HANDOVER.md)를 참고하세요.
+
+- **수집·알림:** Scheduler → Python Functions → 네이버 공개 게시물 조회 → Firestore 중복·토큰 조회 → FCM 발송 → 처리 이력 저장.
+- **앱 데이터:** Flutter 앱이 Firestore의 쿠폰 목록을 구독하며, UID 설정 과정에서 FCM 토큰을 등록합니다. 게임 UID는 기기의 암호화 저장소에 보관하고 Firestore에는 저장하지 않습니다.
+- **쿠폰 등록:** 알림이나 목록을 누르면 앱의 WebView가 게임사 페이지에 UID와 쿠폰 코드를 자동 입력합니다. 사용자가 인증·제출을 완료하며 실제 등록은 게임사 서비스가 처리합니다.
+
+[SVG 원본 보기](docs/assets/architecture.svg) · 이미지의 텍스트·도형은 외부 이미지나 폰트 다운로드 없이 편집할 수 있습니다.
+
 ## 기술 스택
 
 ### 모바일 프론트엔드
@@ -53,10 +65,11 @@ trickal_coupon/
 │   │   └── main.dart          # 앱 진입점
 │   └── pubspec.yaml
 ├── functions/                  # Firebase Cloud Functions
+│   ├── main.py                # firebase.json source 기준 배포 진입점
 │   ├── src/
 │   │   ├── scraper/           # 쿠폰 스크래핑 모듈
 │   │   ├── services/          # Firestore 및 알림 서비스
-│   │   └── main.py            # Cloud Functions 진입점
+│   │   └── main.py            # 별도 수정본 (배포 진입점과 기능 차이 있음)
 │   ├── tests/                 # 단위 테스트
 │   └── requirements.txt
 ├── firebase/                   # Firebase 설정
@@ -269,11 +282,13 @@ firebase functions:log
 
 ### `users`
 
+문서 ID는 FCM 토큰의 해시값으로 생성합니다. 게임 UID는 이 컬렉션에 저장하지 않습니다.
+
 ```
 {
   "fcm_token": String,      // FCM 디바이스 토큰
-  "uid": String,            // 사용자의 게임 내 UID
-  "created_at": Timestamp
+  "created_at": Timestamp,
+  "updated_at": Timestamp  // 선택 필드: 토큰 갱신 시 기록
 }
 ```
 

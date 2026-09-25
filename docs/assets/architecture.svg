@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1200" viewBox="0 0 1440 1200" role="img" aria-labelledby="title desc">
+  <title id="title">쿠폰스탕스 서비스 아키텍처</title>
+  <desc id="desc">현재 소스 기준 구성도. 기존 Firebase는 삭제되어 인수자가 재구축해야 한다. Cloud Scheduler가 매분 Python Cloud Functions를 실행한다. 함수는 네이버 게임 라운지에서 공개 쿠폰을 조회하고 Firestore의 중복 기록과 FCM 토큰을 읽어 Firebase Cloud Messaging으로 알림을 보낸 뒤 쿠폰과 처리 이력을 저장한다. Flutter 앱은 Firestore에서 쿠폰 목록을 구독하고 UID 설정 시 알림 토큰을 등록한다. UID는 기기의 암호화 저장소에 저장된다. 사용자가 알림이나 쿠폰 목록을 누르면 앱 안의 WebView가 게임사 페이지에 UID와 쿠폰 코드를 자동 입력하며, 사용자가 인증과 제출을 완료한다. UID는 Firestore에 저장하지 않는다.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', 'Noto Sans KR', 'Malgun Gothic', sans-serif; fill: #172d3b; }
+      .title { font-size: 42px; font-weight: 750; letter-spacing: -1.6px; }
+      .heading { font-size: 26px; font-weight: 700; letter-spacing: -.6px; }
+      .body { font-size: 21px; }
+      .small { font-size: 18px; }
+      .muted { fill: #536878; }
+      .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 2px; }
+      .mono { font-family: Consolas, 'Noto Sans KR', 'Malgun Gothic', monospace; font-size: 18px; }
+      .flow { fill: none; stroke: #527c92; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .user-flow { fill: none; stroke: #7966ac; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#purple-arrow); }
+      .icon { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#527c92" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="purple-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#7966ac" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <g id="clock" class="icon">
+      <circle cx="20" cy="20" r="15"/><path d="M20 10v11l7 4"/>
+    </g>
+    <g id="code" class="icon">
+      <path d="M12 9L2 20l10 11M28 9l10 11-10 11M24 6l-8 28"/>
+    </g>
+    <g id="bell" class="icon">
+      <path d="M8 28h24l-4-6v-8a8 8 0 0 0-16 0v8zM16 33a4 4 0 0 0 8 0M20 3v3"/>
+    </g>
+    <g id="database" class="icon">
+      <ellipse cx="20" cy="9" rx="15" ry="6"/>
+      <path d="M5 9v22c0 8 30 8 30 0V9M5 20c0 8 30 8 30 0"/>
+    </g>
+    <g id="phone" class="icon">
+      <rect x="8" y="2" width="24" height="36" rx="5"/><path d="M16 7h8M17 32h6"/>
+    </g>
+    <g id="browser" class="icon">
+      <rect x="2" y="5" width="36" height="30" rx="4"/><path d="M2 14h36M8 10h1M14 10h1M20 10h1"/>
+    </g>
+    <g id="lock" class="icon">
+      <rect x="8" y="17" width="24" height="20" rx="4"/><path d="M13 17v-7a7 7 0 0 1 14 0v7M20 25v5"/>
+    </g>
+  </defs>
+
+  <rect width="1440" height="1200" rx="24" fill="#f7f9fc"/>
+  <rect x="48" y="42" width="5" height="68" rx="2.5" fill="#268aa3"/>
+  <text x="72" y="61" class="eyebrow muted">COUPONSTANCE / SERVICE ARCHITECTURE</text>
+  <text x="70" y="110" class="title">쿠폰을 발견하고, 알리고, 등록하기까지</text>
+  <text x="1392" y="60" text-anchor="end" class="small muted">Android · 소스 기준</text>
+
+  <rect x="48" y="142" width="1344" height="58" rx="12" fill="#fff2d8" stroke="#efd7a1"/>
+  <circle cx="78" cy="171" r="11" fill="none" stroke="#936a1f" stroke-width="2"/>
+  <path d="M78 164v8M78 177v1" stroke="#936a1f" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="102" y="179" class="body" style="fill:#7b591b">인수 상태: 기존 Firebase 삭제 · 아래 백엔드는 인수자 소유 프로젝트에 재구축 필요</text>
+
+  <!-- Service boundaries -->
+  <rect x="356" y="234" width="666" height="666" rx="20" fill="#fffaf0" stroke="#e7d6b0" stroke-width="1.5"/>
+  <text x="384" y="271" class="eyebrow" style="fill:#936a1f">02 / FIREBASE BACKEND</text>
+  <text x="994" y="270" text-anchor="end" class="small muted">functions/ · firebase/</text>
+  <rect x="1070" y="234" width="322" height="666" rx="20" fill="#ecf6fc" stroke="#bfdbe9" stroke-width="1.5"/>
+  <text x="1096" y="271" class="eyebrow" style="fill:#287897">03 / MOBILE APP</text>
+
+  <!-- Public coupon source -->
+  <text x="48" y="394" class="eyebrow" style="fill:#28795b">01 / PUBLIC SOURCE</text>
+  <rect x="48" y="414" width="260" height="226" rx="16" fill="#ffffff" stroke="#c9dfd4" stroke-width="1.5"/>
+  <rect x="70" y="436" width="44" height="44" rx="12" fill="#e6f5ec"/>
+  <text x="92" y="468" text-anchor="middle" style="font-size:30px;font-weight:800;fill:#248755">N</text>
+  <text x="128" y="464" class="heading">네이버</text>
+  <text x="70" y="518" class="heading">게임 라운지</text>
+  <text x="70" y="558" class="body muted">트릭컬 공개 쿠폰 게시판</text>
+  <text x="70" y="592" class="body muted">JSON API · 오늘 게시물</text>
+  <text x="70" y="621" class="small muted">함수가 조회하여 코드 추출</text>
+
+  <!-- Scheduler -->
+  <rect x="384" y="296" width="608" height="84" rx="14" fill="#ffffff" stroke="#e7d6b0"/>
+  <use href="#clock" x="405" y="318" style="color:#aa7a26"/>
+  <text x="460" y="332" class="heading">Cloud Scheduler</text>
+  <text x="460" y="361" class="small muted">매 1분 수집 실행 · 매일 03:00 기록 정리*</text>
+
+  <!-- Functions -->
+  <rect x="384" y="460" width="296" height="180" rx="16" fill="#ffffff" stroke="#e7d6b0"/>
+  <use href="#code" x="406" y="480" style="color:#aa7a26"/>
+  <text x="460" y="509" class="heading">Cloud Functions</text>
+  <rect x="406" y="531" width="129" height="30" rx="8" fill="#fff2d8"/>
+  <text x="470" y="553" text-anchor="middle" class="small" style="fill:#815d1c">Python 3.11</text>
+  <text x="406" y="592" class="body muted">추출 → 중복 확인 → 발송</text>
+  <text x="406" y="621" class="mono muted">functions/main.py</text>
+
+  <!-- Messaging -->
+  <rect x="744" y="460" width="248" height="180" rx="16" fill="#ffffff" stroke="#e7d6b0"/>
+  <use href="#bell" x="766" y="480" style="color:#aa7a26"/>
+  <text x="820" y="509" class="heading">FCM</text>
+  <text x="766" y="553" class="body muted">Cloud Messaging</text>
+  <text x="766" y="592" class="body muted">등록 기기에 푸시 전송</text>
+  <text x="766" y="621" class="small muted">쿠폰 코드 · 게시물 정보</text>
+
+  <!-- Firestore -->
+  <rect x="384" y="710" width="608" height="164" rx="16" fill="#ffffff" stroke="#e7d6b0"/>
+  <use href="#database" x="406" y="729" style="color:#aa7a26"/>
+  <text x="460" y="758" class="heading">Cloud Firestore</text>
+  <text x="408" y="800" class="mono">coupons</text>
+  <text x="659" y="800" class="body muted">쿠폰 이력 · 14일 보관</text>
+  <text x="408" y="829" class="mono">processed_feeds</text>
+  <text x="659" y="829" class="body muted">중복 방지 · 7일 보관</text>
+  <text x="408" y="858" class="mono">users</text>
+  <text x="659" y="858" class="body muted">FCM 토큰 · 등록/갱신 시각</text>
+
+  <!-- Mobile components -->
+  <use href="#phone" x="1098" y="299" style="color:#287897"/>
+  <text x="1152" y="331" class="heading">Flutter · Dart</text>
+  <text x="1098" y="371" class="body muted">Riverpod · go_router</text>
+  <text x="1098" y="402" class="mono muted">mobile/lib/</text>
+  <rect x="1092" y="460" width="278" height="180" rx="14" fill="#ffffff" stroke="#bfdbe9"/>
+  <text x="1114" y="501" class="heading">알림 수신</text>
+  <text x="1114" y="545" class="body muted">firebase_messaging</text>
+  <text x="1114" y="580" class="body muted">새 쿠폰을 알림으로 안내</text>
+  <text x="1114" y="614" class="small muted">전경에서는 로컬 알림 표시</text>
+  <rect x="1092" y="710" width="278" height="164" rx="14" fill="#ffffff" stroke="#bfdbe9"/>
+  <text x="1114" y="751" class="heading" style="font-size:23px">쿠폰 목록 · 알림 등록</text>
+  <text x="1114" y="792" class="body muted">쿠폰 목록 실시간 구독</text>
+  <text x="1114" y="827" class="body muted">UID 설정 시 FCM 토큰 등록</text>
+  <text x="1114" y="857" class="small muted">Firestore에 게임 UID 저장 안 함</text>
+
+  <!-- Data and trigger paths -->
+  <path d="M308 538H384" class="flow"/>
+  <text x="346" y="520" text-anchor="middle" class="small muted">응답</text>
+  <path d="M530 380V460" class="flow"/>
+  <text x="548" y="425" class="body muted">스케줄 실행</text>
+  <path d="M680 550H744" class="flow"/>
+  <text x="712" y="532" text-anchor="middle" class="small muted">발송</text>
+  <path d="M992 550H1092" class="flow"/>
+  <text x="1042" y="532" text-anchor="middle" class="small muted">알림</text>
+  <path d="M532 640V710" class="flow" marker-start="url(#arrow)"/>
+  <text x="552" y="682" class="small muted">중복·토큰 조회 / 처리 후 기록</text>
+  <path d="M992 780H1092" class="flow"/>
+  <text x="1042" y="762" text-anchor="middle" class="small muted">목록</text>
+  <path d="M1092 842H992" class="flow"/>
+  <text x="1042" y="824" text-anchor="middle" class="small muted">토큰</text>
+
+  <!-- On-device storage is separate from server data -->
+  <rect x="48" y="710" width="260" height="190" rx="16" fill="#f2eef8" stroke="#d9cfe8"/>
+  <use href="#lock" x="70" y="731" style="color:#7966ac"/>
+  <text x="124" y="760" class="heading">기기 내 UID</text>
+  <text x="70" y="803" class="body muted">암호화하여 로컬 저장</text>
+  <text x="70" y="837" class="mono muted" style="font-size:16px">flutter_secure_storage</text>
+  <text x="70" y="871" class="small muted">자동 입력할 때 읽어서 사용</text>
+
+  <!-- Redemption uses the external game provider, not Firebase -->
+  <path d="M178 900V927H1125V978" class="user-flow"/>
+  <rect x="516" y="912" width="162" height="30" rx="8" fill="#f7f9fc"/>
+  <text x="597" y="934" text-anchor="middle" class="small" style="fill:#7966ac">로컬 UID 읽기</text>
+  <path d="M1280 900V978" class="user-flow"/>
+  <text x="1297" y="952" class="small" style="fill:#7966ac">알림·목록 탭</text>
+
+  <text x="48" y="1006" class="eyebrow" style="fill:#7966ac">04 / REDEMPTION</text>
+  <text x="48" y="1046" class="body muted">마지막 인증·제출은</text>
+  <text x="48" y="1078" class="body muted">사용자가 직접 진행</text>
+
+  <rect x="356" y="978" width="420" height="146" rx="16" fill="#ffffff" stroke="#d9cfe8" stroke-width="1.5"/>
+  <use href="#browser" x="378" y="999" style="color:#7966ac"/>
+  <text x="432" y="1029" class="heading">게임사 쿠폰 등록 서비스</text>
+  <text x="380" y="1070" class="body muted">UID + 쿠폰 코드를 받아 등록 처리</text>
+  <text x="380" y="1103" class="small muted">coupon.a.prod.service.trickcal.io</text>
+
+  <rect x="858" y="978" width="534" height="146" rx="16" fill="#f2eef8" stroke="#d9cfe8" stroke-width="1.5"/>
+  <use href="#browser" x="880" y="999" style="color:#7966ac"/>
+  <text x="934" y="1029" class="heading">앱 안의 WebView</text>
+  <text x="882" y="1070" class="body muted">게임사 페이지 열기 → UID · 쿠폰 코드 자동 입력</text>
+  <text x="882" y="1103" class="small muted">webview_flutter · JavaScript 입력 보조</text>
+  <path d="M858 1052H776" class="user-flow"/>
+  <text x="817" y="1034" text-anchor="middle" class="small" style="fill:#7966ac">제출</text>
+
+  <text x="48" y="1170" class="small muted">* 정리 스케줄은 코드상 시간대 미지정. 보안 규칙·토큰 재등록 등 재가동 전 조치는 docs/HANDOVER.md 참고.</text>
+  <text x="1392" y="1170" text-anchor="end" class="small muted">2026.09</text>
+</svg>
