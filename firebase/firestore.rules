@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users collection - stores FCM tokens only (no UID)
+    match /users/{userId} {
+      // Allow anyone to read/write for FCM token registration (no authentication required)
+      // UID is stored locally only, Firebase only stores FCM tokens
+      allow read, write: if true;
+    }
+
+    // Coupons collection - stores coupon history
+    match /coupons/{couponId} {
+      // Anyone can read coupon information
+      allow read: if true;
+
+      // Only Cloud Functions can write coupon data
+      allow write: if request.auth.token.admin == true;
+    }
+
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
