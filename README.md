@@ -98,6 +98,8 @@ cd trickal-coupon-notifier
 
 #### 2. Firebase 설정
 
+현재 Firebase 연결 파일은 인수인계용 `REPLACE_WITH_...` 예시값입니다. 그대로는 앱 실행·배포에 사용할 수 없습니다. 인수자가 자신의 Firebase 프로젝트를 만들고 새 설정을 생성해야 합니다. 과거 프로젝트의 식별 정보는 [인수인계 문서](docs/HANDOVER.md)에 기록되어 있습니다.
+
 ```bash
 # Firebase CLI 설치
 npm install -g firebase-tools
@@ -105,9 +107,11 @@ npm install -g firebase-tools
 # Firebase 로그인
 firebase login
 
-# Firebase 프로젝트 초기화
-firebase init
+# 프로젝트 루트에서 새 Firebase 프로젝트를 선택하고 별칭을 default로 지정
+firebase use --add
 ```
+
+저장소에 있는 `firebase.json`의 함수·Firestore 설정을 사용합니다. 새 프로젝트 ID가 루트 `.firebaserc`의 `projects.default`에 들어갔는지 확인하세요.
 
 #### 3. 백엔드 설정 (Cloud Functions)
 
@@ -135,9 +139,23 @@ cd mobile
 # Flutter 의존성 설치
 flutter pub get
 
-# Flutter용 Firebase 구성
+# FlutterFire CLI 설치
+dart pub global activate flutterfire_cli
+
+# 인수자 소유의 새 Firebase 프로젝트와 Android 플랫폼 선택
 flutterfire configure
 ```
+
+기존 예시 설정을 재사용하지 말고 새 프로젝트를 선택하세요. Android 패키지명은 **`io.trickcal.trickcal_coupon_notifier`**로 유지합니다. iOS·웹은 이번 인계의 출시 범위가 아니며, 실제 사용할 때만 해당 플랫폼도 구성합니다. [Firebase 공식 Flutter 설정 안내](https://firebase.google.com/docs/flutter/setup)
+
+| 파일 | 인수자가 확인할 내용 |
+| --- | --- |
+| `.firebaserc` | 서버 배포 대상인 새 Firebase 프로젝트 ID |
+| `mobile/firebase.json` | FlutterFire CLI가 기록한 새 프로젝트·플랫폼별 앱 ID |
+| `mobile/lib/firebase_options.dart` | 새 프로젝트에서 생성한 플랫폼별 Firebase 클라이언트 설정 |
+| `mobile/android/app/google-services.json` | 같은 프로젝트·동일 Android 패키지에 대응하는 설정. CLI 결과를 확인하고 필요하면 Firebase Console에서 받은 파일로 교체 |
+
+예시 문자열을 키로 사용하거나 임의로 만들어 넣지 마세요. 설정 파일은 같은 Firebase 프로젝트에서 생성된 값으로 함께 교체합니다. 위 명령을 실행해 새 설정을 생성한 뒤, 사용하는 플랫폼에 `REPLACE_WITH_`가 남아 있지 않은지 확인하세요. 서비스 계정 JSON의 `private_key`나 업로드 keystore 비밀번호는 이 파일들에 넣지 않습니다.
 
 #### 5. Android 앱 서명 설정 (릴리즈 빌드 필수)
 
@@ -373,7 +391,7 @@ dart format lib/
 
 - 사용자 UID는 하드웨어 기반 암호화가 적용된 `flutter_secure_storage`를 사용하여 저장
 - Firestore 보안 규칙으로 인증된 사용자만 접근 제한
-- API 키나 비밀 정보는 버전 관리에 포함되지 않음
+- Firebase 클라이언트 설정은 현재 예시값이며 인수자가 새 프로젝트 설정으로 교체해야 함. 서버 관리자 자격증명·서명 개인 키는 소스에 포함하지 않음
 - FCM 토큰은 자동으로 관리 및 갱신됨
 
 ## 라이선스

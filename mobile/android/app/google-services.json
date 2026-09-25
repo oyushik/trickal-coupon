@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "938423391335",
-    "project_id": "trickcal-coupon-notifier",
-    "storage_bucket": "trickcal-coupon-notifier.firebasestorage.app"
+    "project_number": "REPLACE_WITH_FIREBASE_PROJECT_NUMBER",
+    "project_id": "REPLACE_WITH_FIREBASE_PROJECT_ID",
+    "storage_bucket": "REPLACE_WITH_FIREBASE_STORAGE_BUCKET"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:938423391335:android:a23001c64105a3f71230c2",
+        "mobilesdk_app_id": "REPLACE_WITH_FIREBASE_ANDROID_APP_ID",
         "android_client_info": {
           "package_name": "io.trickcal.trickcal_coupon_notifier"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAl_jLGbFBIkwUqaFQ5XP6D4jRweVCzDEQ"
+          "current_key": "REPLACE_WITH_FIREBASE_ANDROID_API_KEY"
         }
       ],
       "services": {

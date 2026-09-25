@@ -94,6 +94,8 @@ Firestore 쿠폰 목록    (실제 쿠폰 등록은 게임사 서비스가 처�
 
 인수자가 수행할 필수 작업:
 
+현재 `.firebaserc`, `mobile/firebase.json`, `mobile/lib/firebase_options.dart`, `mobile/android/app/google-services.json`의 옛 프로젝트 연결값은 `REPLACE_WITH_...` 예시값으로 교체했다. 이 상태는 실행·배포용 설정이 아니다. 위의 과거 프로젝트 ID·인증서 등은 인계 기록이며 새 설정에 복사할 값이 아니다. 아래 1~2단계와 README의 Firebase 설정 절차에 따라 인수자 프로젝트의 설정을 생성한다.
+
 1. 인수자가 새 프로젝트 ID, 소유 계정, 결제 주체, 리전과 운영 담당자를 결정한다. Cloud Functions 배포에는 Blaze 요금제가 필요하다. [Firebase 배포 요건](https://firebase.google.com/docs/functions/get-started?gen=2nd)
 2. Android 앱을 **동일한 패키지명**으로 Firebase에 등록한다. `.firebaserc`, `mobile/firebase.json`, `mobile/lib/firebase_options.dart`, `mobile/android/app/google-services.json`을 일관되게 갱신한다.
 3. 아래 재가동 전 문제를 해결하고 Firestore·Functions·Scheduler·FCM을 구성한다. 기존 데이터는 백업이 실제로 발견된 범위만 복원한다.
@@ -102,6 +104,10 @@ Firestore 쿠폰 목록    (실제 쿠폰 등록은 게임사 서비스가 처�
 6. 구버전은 삭제된 Firebase를 계속 가리키므로 업데이트하지 않은 사용자는 정상화되지 않을 수 있음을 안내한다. 기존 알림 경로가 없어졌다면 Play 등록정보나 기존 공지 채널로 알린다.
 
 현재 확정된 것은 기존 운영자의 인계 방침이다. 인수자에게 서버 부재·재구축 책임·데이터 상태를 설명하여 수락 여부를 확인해야 한다. 새 계정 생성·결제 연결·배포는 아직 수행하지 않았다.
+
+Firebase 클라이언트 API 키는 Firebase 전용 API 제한과 보안 규칙 등 조건을 충족하면 소스에 포함할 수 있는 식별값이다. 서버 서비스 계정의 개인 키와 구분한다. 기존 키의 실제 제한·유효성은 이번 작업에서 검증하지 않았다. [Firebase API 키 안내](https://firebase.google.com/docs/projects/api-keys)
+
+예시값으로 바꾸어도 이전 Git 커밋과 보관 APK/AAB의 설정값이 소급 변경되지는 않는다. 기존 GitHub secret scanning 경고는 해당 키의 폐기·비활성 상태 등을 확인한 뒤 사실에 맞는 사유로 별도 처리한다. 현재 파일 수정만으로 키 폐기나 경고 해결이 완료되었다고 기록하지 않는다. 인수자는 새 설정으로 앱을 다시 빌드해야 한다. [GitHub 경고 처리 안내](https://docs.github.com/en/code-security/how-tos/manage-security-alerts/manage-secret-scanning-alerts/resolving-alerts)
 
 ## 4. 기존 운영자가 넘길 정보와 자료
 
@@ -313,4 +319,4 @@ FCM의 해당 멀티캐스트 방식은 호출당 최대 500개 등록 토큰을
 - [ ] 인수자가 배포·로그 확인·장애 대응·비용 확인을 자신의 권한으로 할 수 있다.
 - [ ] 남은 운영 문제의 담당자와 대응 일정이 정해졌다.
 
-아직 실제 앱 이전, 계정 생성, Firebase 복구, 데이터 이동, 코드 수정, 배포는 진행하지 않았다.
+인수인계 문서·구성도 작성과 Firebase 연결 설정의 예시값 정리를 수행했다. 실제 앱 이전, 계정 생성, Firebase 복구·재구축, 데이터 이동, 서비스 기능 수정·배포와 GitHub 경고 처리는 진행하지 않았다.
